@@ -10,7 +10,11 @@ $python feature.py start_date end_date output_file_name
 
 $python model.py input_file_name
 
-3.registermodel.py
+3.azurews.py
+
+azure machine learning ws connection configuration
+
+4.registermodel.py
 
 $python RegisterModel WhatModel
 
