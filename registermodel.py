@@ -6,12 +6,20 @@ Created on Sun Dec  1 22:43:11 2019
 """
 
 from sklearn.externals import joblib
+import sys
 
 from azureml.core import Workspace
 ws = Workspace.from_config()
 
+#run manual
 RegisterModel = 'fdc'
 WhatModel = 'OneClassSVM'
+
+
+#input parameter
+#RegisterModel =  str(sys.argv[1])
+#WhatModel =  str(sys.argv[2])
+
 
 from azureml.core.model import Model
 
