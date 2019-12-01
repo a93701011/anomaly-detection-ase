@@ -28,8 +28,13 @@ training nodel.
 $python model.py input_file_name
 ```
 
-3.azurews.py
+3.azurews.py 
 azure machine learning ws connection configuration.
+
+```bash
+$python azurews.py
+```
+
 
 4.registermodel.py
 register model to azure machine learning serivce A3CIM.
