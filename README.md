@@ -1,3 +1,14 @@
+# Installation
+
+1.python connection to sql server
+
+```bash
+pip install pyodbc 
+
+2.ODBC Driver 17 for SQL Server 
+https://www.microsoft.com/zh-tw/download/details.aspx?id=56567 
+
+
 # anomaly_detection_ase
 
 run by order
