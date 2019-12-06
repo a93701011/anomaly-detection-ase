@@ -13,6 +13,7 @@ import pandas as pd
 #from keras.wrappers.scikit_learn import KerasRegressor
 #from keras.models import load_model
 
+
 from azureml.core.model import Model
 from sklearn.externals import joblib
 
@@ -22,7 +23,7 @@ def init():
     model_path = Model.get_model_path('fdc_OneClassSVM')
     #estimator = KerasRegressor(build_fn=baseline_model, epochs=150, batch_size=10, verbose=0)
     estimator = joblib.load(model_path)
-
+    #C:/Users/chiku/Desktop/fdcautoscript/OneClassSVMdata_1205_06.pkl
 
 def run(raw_data):
     # data = np.array(json.loads(raw_data)['data'])
@@ -31,6 +32,8 @@ def run(raw_data):
     data = feature_engineering(datapreparation(df))
     data.drop(columns=['index','MCID','BONDHEAD','datetime','bhz_1_max','bhz_1_min','bhz_2_max','bhz_2_min','bhz_3_max','bhz_3_min'], inplace = True)
     
+    #data['force_2_std'] = data['force_2_std'].apply(lambda x: np.log(x))
+
     # make prediction
     y_hat = estimator.predict(data)
     y_score = estimator.score_samples(data)
@@ -39,11 +42,11 @@ def run(raw_data):
     
     # rule detection
     
-    if data['temp1'][0]<194 :
+    if data['temp1'][0]<190:
         predict_result = -1
         predict_score = 100
     
-    if data['force_3_max'][0]>10 : 
+    if data['force_3_max'][0]>10: 
         predict_result = -1
         predict_score=100
     
@@ -64,7 +67,7 @@ def datapreparation(data):
     data['BHZ']=data['BHZ'].apply(lambda x:str(x).strip())
     data['FORCE']=data['FORCE'].apply(lambda x:str(x).strip())
     data['TEMP']=data['TEMP'].apply(lambda x:str(x).strip())
-    #data['RECIPE']=data['RECIPE'].apply(lambda x : x.strip())
+    data['RECIPE']=data['RECIPE'].apply(lambda x : x.strip())
     data['datetimekey']= data['datetimekey'].apply(lambda x : x.strip())
     data['MCID'] = data['MCID'].apply(lambda x : x.strip())
     data['BONDHEAD'] = data['BONDHEAD'].apply(lambda x : x.strip())
@@ -77,6 +80,9 @@ def datapreparation(data):
     data['BHZ'] = data['BHZ'].str.split('|')
     data['FORCE'] = data['FORCE'].str.split('|')
     data['TEMP'] = data['TEMP'].str.split('|')
+    data.dropna(inplace = True)
+#    print('transfer to row...')
+    data.reset_index(drop=True, inplace=True)
     df_all = []
     for i in range(data.shape[0]):
         CPUTICK = pd.DataFrame(data['CPUTICK'][i])
@@ -94,6 +100,7 @@ def datapreparation(data):
         #data.reset_index(inplace=True, drop = True)
         df_all.append(df)
     df_row = pd.concat(df_all, axis = 0)
+    df_row.drop_duplicates(inplace= True)
     df_row.columns = ['CPUTICK','BHZ','FORCE','TEMP','TXN_TIME','BONDHEAD','MCID','KEY','row_num','datetime']
     df_row = df_row[df_row['CPUTICK'] != '']
     df_row['CPUTICK'] = df_row['CPUTICK'].astype(int)
@@ -101,6 +108,7 @@ def datapreparation(data):
     df_row['FORCE'] = df_row['FORCE'].astype(float)
     df_row['BHZ'] = df_row['BHZ'].astype(float)
     return df_row
+
 def feature_engineering(dftemp):
     #FOREC 70~90之間用TEMP往回推5點作為開始,先平移圖形
     dfreset_temp = dftemp[dftemp['TEMP'] >196 ]
@@ -200,14 +208,16 @@ def feature_engineering(dftemp):
     df_info = df_info[['KEY','MCID','BONDHEAD','datetime']].rename({'KEY':'key'},axis='columns')
     df_info.set_index('key', inplace =True)
     df_info.head()
-    df_features = pd.concat([df_info,dfreset_force_features1,dfreset_force_features2,dfreset_force_features3,
-                  dfreset_temp_features1,dfreset_temp_features2,dfreset_temp_features3,dfreset_temp_features4,
-                  dfreset_bhz_features1,dfreset_bhz_features2,dfreset_bhz_features3],axis = 1)
+    #df_features_a = pd.merge(df_info, right = dfreset_temp_features1, on ='key', how = 'inner', sort = True)
+    df_features = pd.concat([df_info,dfreset_temp_features1,dfreset_force_features1,dfreset_force_features2,dfreset_force_features3
+                  ,dfreset_temp_features2,dfreset_temp_features3,dfreset_temp_features4,dfreset_bhz_features1,dfreset_bhz_features2,dfreset_bhz_features3],axis = 1, sort = True)
+    #df_features_b.set_index('key', inplace =True)
+    #df_features = pd.merge(df_features_a, right = df_features_b, on ='key',how = 'inner', sort = True)
     df_features.dropna(inplace = True)
     df_features.reset_index(inplace =True)
-    df_features.columns = ['index','MCID','BONDHEAD','datetime', 'force_1_max', 'force_1_min', 'force_1_std', 'force_2_max',
+    df_features.columns = ['index','MCID','BONDHEAD','datetime','temp1', 'force_1_max', 'force_1_min', 'force_1_std', 'force_2_max',
        'force_2_min', 'force_2_std', 'force_3_max', 'force_3_min',
-       'force_3_std', 'temp1', 'temp_2_max', 'temp_2_min', 'temp_2_std',
+       'force_3_std',  'temp_2_max', 'temp_2_min', 'temp_2_std',
        'temp_3_max', 'temp_3_min', 'temp_3_std', 'temp_4_std', 'bhz_1_max',
        'bhz_1_min', 'bhz_1_std', 'max-min1', 'bhz_2_max', 'bhz_2_min',
        'bhz_2_std', 'max-min2', 'bhz_3_max', 'bhz_3_min', 'bhz_3_std',
