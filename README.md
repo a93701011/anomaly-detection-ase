@@ -18,7 +18,7 @@ Run this script by order
 create feature for training model.
 
 ```bash
-$python feature.py start_date end_date output_file_name
+$python feature.py start_date end_date to_csv
 ```
 
 2.model.py  
@@ -40,5 +40,5 @@ $python azurews.py
 register model to azure machine learning serivce A3CIM.
 
 ```bash
-$python RegisterModel WhatModel
+$python registermodel.py RegisterModel WhatModel
 ```
