@@ -9,22 +9,23 @@ Created on Sun Dec  1 23:29:24 2019
 import json
 import numpy as np
 import pandas as pd
+import os
 
-#from keras.wrappers.scikit_learn import KerasRegressor
 #from keras.models import load_model
 
-
+import joblib
 from azureml.core.model import Model
-from sklearn.externals import joblib
+
 
 def init():
     global estimator
+    
     # retreive the path to the model file using the model name
-    model_path = Model.get_model_path('fdc_OneClassSVM')
+    #model_path = Model.get_model_path('OneClassSVM')
+    model_path = os.path.join(os.getenv('AZUREML_MODEL_DIR'), 'OneClassSVM.pkl')
     #estimator = KerasRegressor(build_fn=baseline_model, epochs=150, batch_size=10, verbose=0)
     estimator = joblib.load(model_path)
-    #C:/Users/chiku/Desktop/fdcautoscript/OneClassSVMdata_1205_06.pkl
-
+    
 def run(raw_data):
     # data = np.array(json.loads(raw_data)['data'])
     jsoninput =json.loads(raw_data)
@@ -51,7 +52,7 @@ def run(raw_data):
         predict_score=100
     
     output ={}
-    
+    #output['result']  =data.shape
     output['result'] = str(predict_result)
     output['score'] = str(predict_score)
     
@@ -210,14 +211,15 @@ def feature_engineering(dftemp):
     df_info.head()
     #df_features_a = pd.merge(df_info, right = dfreset_temp_features1, on ='key', how = 'inner', sort = True)
     df_features = pd.concat([df_info,dfreset_temp_features1,dfreset_force_features1,dfreset_force_features2,dfreset_force_features3
-                  ,dfreset_temp_features2,dfreset_temp_features3,dfreset_temp_features4,dfreset_bhz_features1,dfreset_bhz_features2,dfreset_bhz_features3],axis = 1, sort = True)
+                             ,dfreset_temp_features2,dfreset_temp_features3,dfreset_temp_features4,
+                  dfreset_bhz_features1,dfreset_bhz_features2,dfreset_bhz_features3],axis = 1, sort = True)
     #df_features_b.set_index('key', inplace =True)
     #df_features = pd.merge(df_features_a, right = df_features_b, on ='key',how = 'inner', sort = True)
     df_features.dropna(inplace = True)
     df_features.reset_index(inplace =True)
-    df_features.columns = ['index','MCID','BONDHEAD','datetime','temp1', 'force_1_max', 'force_1_min', 'force_1_std', 'force_2_max',
+    df_features.columns = ['index','MCID','BONDHEAD','datetime', 'temp1','force_1_max', 'force_1_min', 'force_1_std', 'force_2_max',
        'force_2_min', 'force_2_std', 'force_3_max', 'force_3_min',
-       'force_3_std',  'temp_2_max', 'temp_2_min', 'temp_2_std',
+       'force_3_std', 'temp_2_max', 'temp_2_min', 'temp_2_std',
        'temp_3_max', 'temp_3_min', 'temp_3_std', 'temp_4_std', 'bhz_1_max',
        'bhz_1_min', 'bhz_1_std', 'max-min1', 'bhz_2_max', 'bhz_2_min',
        'bhz_2_std', 'max-min2', 'bhz_3_max', 'bhz_3_min', 'bhz_3_std',
