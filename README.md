@@ -10,6 +10,12 @@ pip install pyodbc
 https://www.microsoft.com/zh-tw/download/details.aspx?id=56567 
 
 
+3.joblib
+```bash
+pip install joblib 
+```
+
+
 # How to use the script
 
 Run this script by order
