@@ -4,8 +4,8 @@ Created on Sun Dec  1 22:43:11 2019
 
 @author: chiku
 """
-
-from sklearn.externals import joblib
+import joblib
+#from sklearn.externals import joblib
 import sys
 
 from azureml.core import Workspace
@@ -33,7 +33,7 @@ from azureml.core.model import Model
 #from keras.wrappers.scikit_learn import KerasRegressor
 #from keras.models import load_model
 
-model=Model(ws, '{}_{}'.format(RegisterModel,WhatModel))
+model=Model(ws, '{}_{}'.format(RegisterModel,WhatModel) )
 model.download(target_dir='.', exist_ok=True)
 
 import os 
@@ -53,7 +53,7 @@ cd.save_to_file(".", "myenv.yml")
 # This specifies the dependencies to include in the environment
 from azureml.core.conda_dependencies import CondaDependencies 
 
-myenv = CondaDependencies.create(conda_packages=['pandas', 'scikit-learn', 'numpy', 'keras', 'joblib'])
+myenv = CondaDependencies.create(conda_packages=['scikit-learn','joblib'])
 
 with open("myenv.yml","w") as f:
     f.write(myenv.serialize_to_string())
@@ -70,14 +70,15 @@ image = Image.create(name = "fdc-oneclasssvm",
                      image_config = image_config, 
                      workspace = ws)
 image.wait_for_creation(show_output = True)
+
 # Create Container Instance
 
 from azureml.core.webservice import AciWebservice
 
 aciconfig = AciWebservice.deploy_configuration(cpu_cores=1, 
                                                memory_gb=1, 
-                                               tags={"data": "nopbcsr-s",  "method" : WhatModel}, 
-                                               description='Predict AVM Profile')
+                                               tags={"data": "fdc",  "method" : WhatModel}, 
+                                               description='fdc')
 
 from azureml.core.webservice import Webservice
 
@@ -90,8 +91,8 @@ aci_service = Webservice.deploy_from_image(deployment_config = aciconfig,
 aci_service.wait_for_deployment(True)
 print(aci_service.state)
 # retrive service
+
 from azureml.core.webservice import Webservice
-aci_service_name = 'fdc-oneclass-prediction'
 aci_service = Webservice(ws, aci_service_name)
 
 print(aci_service.scoring_uri)

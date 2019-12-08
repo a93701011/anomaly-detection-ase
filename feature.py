@@ -2,19 +2,11 @@ import pandas as pd
 import pyodbc
 import os
 import psutil
-import sys
 
-#manual run
-txn_time_start = '2019-11-27'
-txn_time_end = '2019-11-28'
-to_csv ='data_1127_28'
+txn_time_start = '2019-11-20'
+txn_time_end = '2019-12-08'
+to_csv ='data_1120_08'
 
-#input parameter
-#txn_time_start = str(sys.argv[1])
-#txn_time_end = str(sys.argv[2])
-#to_csv =str(sys.argv[3])
-
-#print("parameters list".format(str(sys.argv)))
 
 server = 'fdcdwserver.database.windows.net' 
 database = 'fdcdb' 
@@ -22,7 +14,6 @@ username = 'aseadmin'
 password = 'p@ssw0rd' 
                          
 sql_conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
-
 query = "SELECT [TXN_TIME],[LOTID],[YEARCODE],[RECIPE],[QTY],[PACKAGECODE],[DEVICE],[LC],[CUSTOMER],[MCID],[BONDHEAD],[KEY],[CPUTICK],[FORCE],[TEMP],[BHZ] FROM [dbo].[fdc_data_master] where TXN_TIME > '{}' and TXN_TIME<'{}' and [ScoredLabels] = 1".format(txn_time_start, txn_time_end)
 print(query)
 
@@ -40,7 +31,7 @@ data['CPUTICK']=data['CPUTICK'].apply(lambda x:x.strip())
 data['BHZ']=data['BHZ'].apply(lambda x:str(x).strip())
 data['FORCE']=data['FORCE'].apply(lambda x:str(x).strip())
 data['TEMP']=data['TEMP'].apply(lambda x:str(x).strip())
-#data['RECIPE']=data['RECIPE'].apply(lambda x : x.strip())
+data['RECIPE']=data['RECIPE'].apply(lambda x : x.strip())
 data['datetimekey']= data['datetimekey'].apply(lambda x : x.strip())
 data['MCID'] = data['MCID'].apply(lambda x : x.strip())
 data['BONDHEAD'] = data['BONDHEAD'].apply(lambda x : x.strip())
@@ -68,6 +59,7 @@ for i in range(data.shape[0]):
     df['TXN_TIME'] = data['TXN_TIME'][i]
     df['BONDHEAD'] = data['BONDHEAD'][i]
     df['MCID'] = data['MCID'][i]
+    df['RECIPE'] =  data['RECIPE']
     df['Key'] =data['Key'][i]
     df['row_num'] = list(range(1,len(data['CPUTICK'][i])+1))
     #df['Label'] = 0
@@ -83,7 +75,7 @@ process = psutil.Process(os.getpid())
 print(process.memory_info().rss/1024/1024/1024) # in GB
 
 df_row.drop_duplicates(inplace= True)
-df_row.columns = ['CPUTICK','BHZ','FORCE','TEMP','TXN_TIME','BONDHEAD','MCID','KEY','row_num','datetime']
+df_row.columns = ['CPUTICK','BHZ','FORCE','TEMP','TXN_TIME','BONDHEAD','MCID','RECIPE','KEY','row_num','datetime']
 df_row = df_row[df_row['CPUTICK'] != '']
 df_row['CPUTICK'] = df_row['CPUTICK'].astype(int)
 df_row['TEMP'] = df_row['TEMP'].astype(float)
@@ -186,7 +178,7 @@ def feature_engineering(dftemp):
     dfreset_temp_features4.head()
     #
     df_info = dftemp[dftemp['CPUTICK'] == 0]
-    df_info = df_info[['KEY','MCID','BONDHEAD','datetime']].rename({'KEY':'key'},axis='columns')
+    df_info = df_info[['KEY','MCID','BONDHEAD','datetime','RECIPE']].rename({'KEY':'key'},axis='columns')
     df_info.set_index('key', inplace =True)
     df_info.head()
     df_features_a = pd.merge(df_info, right = dfreset_temp_features1, on ='key', how = 'inner', sort = True)
@@ -196,7 +188,7 @@ def feature_engineering(dftemp):
     df_features = pd.merge(df_features_a, right = df_features_b, on ='key',how = 'inner', sort = True)
     df_features.dropna(inplace = True)
     df_features.reset_index(inplace =True)
-    df_features.columns = ['index','MCID','BONDHEAD','datetime','temp1', 'force_1_max', 'force_1_min', 'force_1_std', 'force_2_max',
+    df_features.columns = ['index','MCID','BONDHEAD','datetime','RECIPE','temp1', 'force_1_max', 'force_1_min', 'force_1_std', 'force_2_max',
        'force_2_min', 'force_2_std', 'force_3_max', 'force_3_min',
        'force_3_std',  'temp_2_max', 'temp_2_min', 'temp_2_std',
        'temp_3_max', 'temp_3_min', 'temp_3_std', 'temp_4_std', 'bhz_1_max',
@@ -207,6 +199,3 @@ def feature_engineering(dftemp):
 print('start to create feature...')
 df_features = feature_engineering(df_row)
 df_features.to_csv('./{}.csv'.format(to_csv), index = False)
-
-del df_row
-

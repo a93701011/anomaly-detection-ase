@@ -30,7 +30,7 @@ X_train, X_test = train_test_split( datadrop, test_size=0.05, random_state=42)
 print(X_train.shape)
 print(X_test.shape)
 #import pickle
-from sklearn.externals import joblib
+import joblib
 from sklearn.svm import OneClassSVM
 #from sklearn.model_selection import GridSearchCV, ParameterGrid
 
@@ -74,7 +74,6 @@ print('bad score:{}'.format(np.average(Y_scroe_rbf_t[Y_result_rbf_t==-1])))
 
 
 print('data info------------------------------------------------')
-
 
 good_data = datadrop[Y_result_rbf_t == 1]
 bad_data = datadrop[Y_result_rbf_t == -1]
