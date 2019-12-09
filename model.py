@@ -15,7 +15,7 @@ file = 'data_1123_30'
 #file = str(sys.argv[1])
 
 data = pd.read_csv('./{}.csv'.format(file))
-datadrop = data.drop(columns = ['index','MCID','BONDHEAD','datetime'])
+datadrop = data.drop(columns = ['index','MCID','BONDHEAD','datetime','RECIPE'])
 
 datadrop = datadrop.drop(columns = ['bhz_1_max','bhz_1_min','bhz_2_max','bhz_2_min','bhz_3_max','bhz_3_min'])
 #data_0917_drop = data_0917_drop.drop(columns = ['bhz_1_max','bhz_1_min','bhz_2_max','bhz_2_min','bhz_3_max','bhz_3_min'])
