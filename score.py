@@ -42,6 +42,10 @@ def run(raw_data):
     predict_score = y_score[0]
     
     # rule detection
+    predict_result = 1
+    
+    if predict_score<130.0:
+        predict_result = -1
     
     if data['temp1'][0]<190:
         predict_result = -1
