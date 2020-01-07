@@ -3,9 +3,14 @@ import pyodbc
 import os
 import psutil
 
-txn_time_start = '2019-11-20'
-txn_time_end = '2019-12-08'
-to_csv ='data_1120_08'
+txn_time_start = '2020-01-01'
+txn_time_end = '2020-01-07'
+to_csv ='data_0101_0107'
+
+#input parameter
+#txn_time_start = str(sys.argv[1])
+#txn_time_end = str(sys.argv[1])
+#to_csv = str(sys.argv[1])
 
 
 server = 'fdcdwserver.database.windows.net' 
