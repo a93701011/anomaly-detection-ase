@@ -4,8 +4,8 @@ import os
 import psutil
 
 txn_time_start = '2020-01-01'
-txn_time_end = '2020-01-07'
-to_csv ='data_0101_0107'
+txn_time_end = '2020-01-02'
+to_csv ='data_0101_0102'
 
 #input parameter
 #txn_time_start = str(sys.argv[1])
@@ -19,7 +19,7 @@ username = 'aseadmin'
 password = 'p@ssw0rd' 
                          
 sql_conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
-query = "SELECT [TXN_TIME],[LOTID],[YEARCODE],[RECIPE],[QTY],[PACKAGECODE],[DEVICE],[LC],[CUSTOMER],[MCID],[BONDHEAD],[KEY],[CPUTICK],[FORCE],[TEMP],[BHZ] FROM [dbo].[fdc_data_master] where TXN_TIME > '{}' and TXN_TIME<'{}' and [ScoredLabels] = 1".format(txn_time_start, txn_time_end)
+query = "SELECT [TXN_TIME],[LOTID],[YEARCODE],[RECIPE],[QTY],[PACKAGECODE],[DEVICE],[LC],[CUSTOMER],[MCID],[BONDHEAD],[KEY],[CPUTICK],[FORCE],[TEMP],[BHZ] FROM [dbo].[fdc_data_master] where TXN_TIME > '{}' and TXN_TIME<'{}' and LEFT(MCID_SHORT,1) = 'K' and [ScoredLabels] = 1".format(txn_time_start, txn_time_end)
 print(query)
 
 data = pd.read_sql(query, sql_conn)
